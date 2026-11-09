@@ -1,0 +1,462 @@
+/* ------------------------------------------------------------------
+   Siro: stile del sito
+   Muro bianco, inchiostro nero, un solo accento: il giallo di Felt,
+   usato come nastro di carta per segnare dove ci si trova.
+   ------------------------------------------------------------------ */
+
+:root {
+  --muro: #ffffff;
+  --inchiostro: #000000;
+  --grafite: #5e5b56;   /* testi secondari, contrasto 6,6:1 sul bianco */
+  --filo: #dad7d1;      /* linee sottili */
+  --nastro: #f2c200;    /* giallo di Felt */
+  --secondario: var(--grafite);
+
+  /* pareti delle sale, prese dalle tele */
+  --p-giallo: #f5cf08;   /* Felt */
+  --p-rosso: #cd0102;    /* Ljubav */
+  --p-verde: #086a4e;    /* Money */
+  --p-azzurro: #9db8ec;  /* Slam */
+  --p-blu: #041754;      /* Art around art */
+  --p-fucsia: #bc125d;   /* Don't judge */
+  --p-nero: #181415;     /* Never judge */
+
+  --testo: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --firma: 'Big Shoulders Stencil', 'Arial Narrow', Impact, sans-serif;
+
+  /* scala tipografica 1,25 */
+  --t-xs: 0.875rem;
+  --t-s: 1rem;
+  --t-m: 1.125rem;
+  --t-l: 1.4rem;
+  --t-xl: 2rem;
+  --t-xxl: clamp(2.2rem, 5vw, 3.6rem);
+
+  --rail: 0px;
+  --margine: 1.25rem;
+  --k: 1.6; /* pixel per centimetro nella parete delle opere */
+}
+
+@media (min-width: 700px) {
+  :root { --margine: 2rem; --k: 2; }
+}
+@media (min-width: 1000px) {
+  :root { --rail: clamp(6rem, 9vw, 8.5rem); --margine: 3rem; --k: 2.3; }
+}
+@media (min-width: 1500px) {
+  :root { --k: 2.7; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--muro);
+  color: var(--inchiostro);
+  font-family: var(--testo);
+  font-size: var(--t-m);
+  line-height: 1.5;
+  font-kerning: normal;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 3px solid var(--inchiostro);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 7px var(--nastro);
+}
+
+h1, h2, h3 { line-height: 1.1; margin: 0; font-weight: 700; }
+
+p { margin: 0 0 1em; max-width: 34em; }
+
+.visivamente-nascosto {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Nastro: il segno giallo per la voce attiva (menu e filtri) */
+.nastro {
+  background: linear-gradient(transparent 55%, var(--nastro) 55%, var(--nastro) 92%, transparent 92%);
+}
+
+/* ---------- Struttura ---------- */
+
+.pagina {
+  min-height: 100vh;
+  padding-left: var(--rail);
+}
+
+.firma {
+  font-family: var(--firma);
+  font-weight: 900;
+  text-decoration: none;
+  line-height: 0.8;
+  letter-spacing: 0.01em;
+}
+
+.testata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding: var(--margine) var(--margine) 0;
+}
+
+.testata .firma { font-size: 4.5rem; }
+
+.menu { padding: 0.9rem var(--margine) 0; }
+.menu ul {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem;
+}
+.menu a { text-decoration: none; font-size: var(--t-s); }
+.menu a:hover { text-decoration: underline; }
+.menu .bandiera { display: inline-block; padding: 0.2rem 0; line-height: 0; }
+.menu .bandiera svg { width: 1.75rem; height: 1.1rem; display: block; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18); }
+.menu .bandiera:hover svg { box-shadow: 0 0 0 2px var(--inchiostro); }
+@media (max-width: 999px) { .menu .lingua { margin-left: auto; } }
+@media (min-width: 1000px) { .menu .lingua { margin-top: 0.9rem; } }
+
+@media (min-width: 1000px) {
+  .testata {
+    position: fixed; inset: 0 auto 0 0;
+    width: var(--rail);
+    padding: var(--margine) 0;
+    flex-direction: column; justify-content: flex-start; align-items: center;
+    border-right: 1px solid var(--filo);
+    background: var(--muro);
+    z-index: 2;
+  }
+  /* il nome in verticale, dal basso verso l'alto.
+     Parte in alto e scende come un cursore mentre si scorre la pagina
+     (la posizione --y la calcola lo script in Base.astro). */
+  .testata .firma {
+    writing-mode: vertical-rl;
+    transform: translateY(var(--y, 0px)) rotate(180deg);
+    font-size: calc(var(--rail) * 1.02);
+    will-change: transform;
+    view-transition-name: firma;
+  }
+  .menu {
+    position: fixed; top: var(--margine); right: var(--margine);
+    padding: 0.9rem 1.1rem 1rem;
+    background: var(--muro);   /* come un cartellino appeso alla parete */
+    z-index: 3;
+  }
+  .menu ul { flex-direction: column; align-items: flex-end; gap: 0.35rem; }
+}
+
+main {
+  --pad-sx: var(--margine);
+  --pad-dx: var(--margine);
+  padding: 2.5rem var(--pad-dx) 5rem var(--pad-sx);
+}
+@media (min-width: 1000px) {
+  main { --pad-dx: calc(var(--margine) + 9rem); padding-top: var(--margine); padding-bottom: 6rem; }
+}
+
+.piede {
+  padding: 2rem var(--margine);
+  border-top: 1px solid var(--filo);
+  color: var(--grafite);
+  font-size: var(--t-xs);
+  display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; justify-content: space-between;
+}
+.piede p { margin: 0; }
+
+/* ---------- Didascalia da parete ---------- */
+
+.didascalia { font-size: var(--t-s); line-height: 1.4; }
+.didascalia strong { font-weight: 700; display: block; }
+.didascalia span { display: block; color: var(--secondario); }
+
+/* ---------- Home ---------- */
+
+.sezione { margin: 0 0 5.5rem; }
+.sezione-titolo {
+  font-size: var(--t-xxl);
+  letter-spacing: -0.01em;
+  margin-bottom: 1.5rem;
+  max-width: 16em;
+}
+.lead { font-size: var(--t-l); line-height: 1.45; max-width: 30em; }
+
+/* L'Artista: paragrafo a sinistra, oblò per la foto a destra */
+.presentazione { display: grid; gap: 1.5rem 4rem; align-items: center; }
+.presentazione .lead { margin: 0; }
+.ritratto { margin: 0; justify-self: center; text-align: center; width: clamp(11rem, 17vw, 15rem); }
+.oblo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #efede8;
+}
+.ritratto figcaption { margin-top: 0.9rem; font-size: var(--t-s); line-height: 1.4; color: var(--grafite); }
+@media (min-width: 1000px) {
+  .presentazione {
+    grid-template-columns: minmax(0, 32em) auto;
+    grid-template-areas: 'titolo titolo' 'testo foto';
+    justify-content: space-between;
+  }
+  .presentazione .sezione-titolo { grid-area: titolo; }
+  .presentazione .lead { grid-area: testo; }
+  .ritratto { grid-area: foto; justify-self: end; }
+}
+
+/* Felt al centro */
+.apertura { margin: 0 auto; width: fit-content; max-width: 100%; }
+.apertura a { display: block; }
+.apertura img { max-height: 76vh; width: auto; }
+.apertura figcaption { margin-top: 0.9rem; }
+
+.progetto { margin-bottom: 6rem; }
+
+
+.vai { font-weight: 700; }
+
+/* ---------- Capitoli dell'introduzione ----------
+   Testo sempre a sinistra, opere sempre a destra.
+   Su telefono le opere scendono sotto il testo. */
+
+.capitolo {
+  display: grid;
+  gap: 1.75rem 3.5rem;
+  margin: 0 0 8rem;
+  align-items: start;
+}
+.capitolo h3 {
+  font-size: clamp(1.75rem, 3.4vw, 2.9rem);
+  letter-spacing: -0.01em;
+  max-width: 17em;
+}
+.capitolo-testo p { max-width: 33em; }
+
+.capitolo-opere { container-type: inline-size; min-width: 0; }
+.capitolo-opere .elenco { display: grid; gap: 2.5rem; }
+/* due opere affiancate solo se la colonna è abbastanza larga, altrimenti una sotto l'altra */
+@container (min-width: 40rem) {
+  .capitolo-opere.coppia .elenco { grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: end; }
+}
+.capitolo-opere figure { margin: 0; min-width: 0; }
+.capitolo-opere a { display: block; }
+.capitolo-opere img {
+  width: auto; max-width: 100%; max-height: 75vh;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.capitolo-opere figcaption { margin-top: 0.75rem; }
+
+@media (min-width: 760px) {
+  .capitolo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'titolo titolo' 'testo opere';
+  }
+  .capitolo h3 { grid-area: titolo; }
+  .capitolo-testo { grid-area: testo; }
+  .capitolo-opere { grid-area: opere; }
+  .capitolo.senza-opere { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'titolo' 'testo'; }
+}
+
+.chiusura .vai { font-size: var(--t-l); }
+.chiusura p { margin-bottom: 0.5rem; }
+
+.sala-foto { margin: 0 0 1.5rem; }
+.sala-foto img { width: 100%; max-width: 70rem; }
+
+/* ---------- Parete delle opere ---------- */
+
+.intestazione { margin-bottom: 2.25rem; }
+.intestazione h1 { font-size: var(--t-xl); margin-bottom: 0.5rem; }
+.intestazione p { color: var(--grafite); font-size: var(--t-s); }
+
+.filtri { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0 0 4rem; padding: 0; list-style: none; }
+.filtri button {
+  font: inherit; font-size: var(--t-s); color: inherit;
+  background: none; border: 0; padding: 0.15rem 0; cursor: pointer;
+}
+.filtri button[aria-pressed='true'] {
+  background: linear-gradient(transparent 55%, var(--nastro) 55%, var(--nastro) 92%, transparent 92%);
+}
+.filtri button:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+
+.parete {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap;
+  align-items: center;          /* tutte appese alla stessa linea di centro */
+  gap: 8rem 3.5rem;             /* spazio verticale per le didascalie */
+  padding-bottom: 5rem;
+}
+.parete li { position: relative; width: max(calc(var(--b) * var(--k) * 1px), 10rem); }
+.parete li[hidden] { display: none; }
+.parete a { display: block; text-decoration: none; }
+.parete img {
+  width: calc(var(--b) * var(--k) * 1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.parete .didascalia { position: absolute; top: 100%; left: 0; width: max(100%, 10rem); padding-top: 0.75rem; }
+.parete a:hover strong { text-decoration: underline; text-underline-offset: 0.2em; }
+
+/* ---------- Scheda opera ---------- */
+
+.scheda { display: grid; gap: 2.5rem; align-items: start; }
+@media (min-width: 1000px) {
+  .scheda { grid-template-columns: minmax(0, 1fr) 19rem; gap: 3.5rem; }
+}
+.scheda .tela img { max-height: 80vh; width: auto; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14); }
+.scheda h1 { font-size: var(--t-xl); margin-bottom: 1rem; }
+.scheda dl { margin: 0 0 1.5rem; font-size: var(--t-s); }
+.scheda dt { color: var(--grafite); }
+.scheda dd { margin: 0 0 0.6rem; }
+.scheda .testo { font-size: var(--t-m); }
+
+.dettagli { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+
+.sfoglia {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  margin-top: 4.5rem; padding-top: 1.5rem; border-top: 1px solid var(--filo);
+  font-size: var(--t-s);
+}
+.sfoglia a { text-decoration: none; display: block; }
+.sfoglia a span { display: block; color: var(--grafite); }
+.sfoglia a:hover strong { text-decoration: underline; text-underline-offset: 0.2em; }
+.sfoglia .successiva { text-align: right; }
+
+/* ---------- Pagine di testo ---------- */
+
+.testo-pagina h1 { font-size: var(--t-xl); margin-bottom: 2rem; }
+.citazione {
+  margin: 3rem 0 0; padding: 0; font-size: var(--t-l); line-height: 1.4; max-width: 24em;
+}
+.citazione p { max-width: none; }
+
+.allestimenti { display: grid; gap: 4rem; }
+.allestimenti img { width: 100%; max-width: 75rem; }
+
+/* Cambio pagina: SIRO risale in alto con un movimento morbido
+   (solo nei browser che lo supportano; negli altri cambia pagina e basta). */
+/* ---------- Pagina Artista ---------- */
+
+.artista-testata { display: grid; gap: 2rem 4rem; align-items: center; margin-bottom: 4rem; }
+.artista-sottotitolo { font-size: var(--t-l); font-weight: 700; letter-spacing: 0.02em; margin: 0; }
+@media (min-width: 760px) {
+  .artista-testata { grid-template-columns: minmax(0, 1fr) auto; }
+  .artista-testata .ritratto { justify-self: end; }
+}
+.biografia { max-width: 36em; font-size: var(--t-m); }
+.biografia p { max-width: none; }
+.biografia h2 { font-size: var(--t-xl); margin: 3rem 0 1.25rem; }
+.studio { margin-top: 6rem; }
+.studio h2 { font-size: var(--t-xl); margin-bottom: 1.5rem; }
+.studio-foto { display: grid; gap: 1.5rem; }
+@media (min-width: 760px) { .studio-foto { grid-template-columns: 1fr 1fr; align-items: start; } }
+.studio-foto img { width: 100%; }
+@media (min-width: 760px) { .studio-foto .studio-grande { grid-column: 1 / -1; } }
+
+.email { font-size: var(--t-l); }
+
+/* ---------- Sale della Home ----------
+   Ogni sala è una parete a tutta larghezza, nel colore di una tela.
+   Testo e didascalie prendono il colore adatto a quella parete. */
+
+.sala {
+  --fondo: var(--muro);
+  --testo: var(--inchiostro);
+  --secondario: var(--grafite);
+  background: var(--fondo);
+  color: var(--testo);
+  margin: 0 calc(-1 * var(--pad-dx)) 0 calc(-1 * var(--pad-sx));
+  padding: clamp(4rem, 11vh, 8rem) var(--pad-dx) clamp(4rem, 11vh, 8rem) var(--pad-sx);
+}
+.sala.sezione, .sala.capitolo, .sala.progetto { margin-bottom: 0; }
+main > .sala:first-child { margin-top: calc(-1 * 2.5rem); }
+@media (min-width: 1000px) { main > .sala:first-child { margin-top: calc(-1 * var(--margine)); } }
+main > .sala:last-child { margin-bottom: -5rem; }
+@media (min-width: 1000px) { main > .sala:last-child { margin-bottom: -6rem; } }
+
+.sala[data-parete='giallo']  { --fondo: var(--p-giallo);  --testo: #000; --secondario: color-mix(in srgb, #000 72%, var(--p-giallo)); }
+.sala[data-parete='azzurro'] { --fondo: var(--p-azzurro); --testo: #000; --secondario: color-mix(in srgb, #000 72%, var(--p-azzurro)); }
+.sala[data-parete='rosso']   { --fondo: var(--p-rosso);   --testo: #fff; --secondario: color-mix(in srgb, #fff 90%, var(--p-rosso)); }
+.sala[data-parete='verde']   { --fondo: var(--p-verde);   --testo: #fff; --secondario: color-mix(in srgb, #fff 88%, var(--p-verde)); }
+.sala[data-parete='blu']     { --fondo: var(--p-blu);     --testo: #fff; --secondario: color-mix(in srgb, #fff 80%, var(--p-blu)); }
+.sala[data-parete='fucsia']  { --fondo: var(--p-fucsia);  --testo: #fff; --secondario: color-mix(in srgb, #fff 90%, var(--p-fucsia)); }
+.sala[data-parete='nero']    { --fondo: var(--p-nero);    --testo: #fff; --secondario: color-mix(in srgb, #fff 80%, var(--p-nero)); }
+
+.sala :focus-visible { outline-color: var(--testo); }
+/* sulle pareti scure e colorate l'ombra delle tele deve vedersi */
+.sala:not([data-parete='bianco']) img { box-shadow: 0 10px 28px -6px rgba(0, 0, 0, 0.45); }
+
+/* la sala di Felt: l'opera al centro, la parete fa da cornice */
+.sala-apertura { display: grid; place-items: center; min-height: 92vh; }
+.sala-apertura .apertura { margin: 0; }
+
+::selection { background: var(--nastro); color: #000; }
+
+/* ---------- Introduzione "stencil" ---------- */
+.intro-schermo, .intro-parola { display: none; }
+html.intro { overflow: hidden; }
+html.intro .intro-schermo { display: block; position: fixed; inset: 0; z-index: 100; background: var(--p-giallo); }
+html.intro .intro-parola { display: grid; place-items: center; position: fixed; inset: 0; z-index: 101; pointer-events: none; }
+html.intro .testata .firma { opacity: 0; }
+.intro-marchio {
+  position: relative; display: block;
+  font-family: var(--firma); font-weight: 900; line-height: 0.8; letter-spacing: 0.01em;
+  font-size: clamp(7rem, 30vw, 22rem); color: #000;
+}
+/* la sagoma ritagliata dello stencil */
+.intro-sagoma { display: block; color: transparent; -webkit-text-stroke: 2px #000; animation: intro-sagoma 0.35s ease-out both; }
+/* la pennellata che riempie le lettere da sinistra a destra */
+.intro-colore {
+  position: absolute; inset: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
+  mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
+  -webkit-mask-size: 220% 100%; mask-size: 220% 100%;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+  animation: intro-pennellata 0.7s cubic-bezier(0.5, 0, 0.2, 1) 0.35s both;
+}
+@keyframes intro-sagoma { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+@keyframes intro-pennellata { to { -webkit-mask-position: 0 0; mask-position: 0 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  ::view-transition-group(firma) { animation-duration: 0.6s; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+
+/* ---------- Modulo contatti ---------- */
+.modulo { display: grid; gap: 0.4rem; max-width: 34rem; margin-top: 2.5rem; }
+.modulo label { font-size: var(--t-s); color: var(--grafite); margin-top: 0.9rem; }
+.modulo input[type='text'], .modulo input[type='email'], .modulo textarea {
+  font: inherit; color: inherit; background: var(--muro);
+  border: 1px solid var(--grafite); border-radius: 0; padding: 0.7rem 0.8rem; width: 100%;
+}
+.modulo textarea { resize: vertical; }
+.modulo .consenso { display: flex; gap: 0.6rem; align-items: flex-start; color: var(--inchiostro); margin-top: 1.25rem; }
+.modulo .consenso input { margin-top: 0.3rem; width: 1.1rem; height: 1.1rem; flex: none; }
+.modulo button {
+  justify-self: start; margin-top: 1.5rem; font: inherit; font-weight: 700; cursor: pointer;
+  padding: 0.8rem 1.4rem; border: 0; background: var(--inchiostro); color: var(--muro);
+}
+.modulo button:hover { background: linear-gradient(transparent 55%, var(--nastro) 55%, var(--nastro) 92%, transparent 92%), var(--inchiostro); }
+.modulo button:disabled { opacity: 0.45; cursor: not-allowed; }
+.modulo .esito { min-height: 1.5em; margin: 0.75rem 0 0; font-weight: 700; }
+.modulo .nota-privacy { font-size: var(--t-xs); color: var(--grafite); margin-top: 1rem; }
+
+/* ---------- Instagram in Contatti ---------- */
+.instagram { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0.6rem; text-decoration: none; margin-bottom: 3.5rem; }
+.instagram img { width: 4.5rem; height: 4.5rem; transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.instagram span { font-weight: 700; font-size: var(--t-l); }
+.instagram:hover img { transform: scale(1.06) rotate(-4deg); }
+.instagram:hover span { text-decoration: underline; text-underline-offset: 0.2em; }

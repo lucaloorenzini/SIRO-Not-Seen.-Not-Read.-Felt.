@@ -1,0 +1,107 @@
+---
+import Base from '../layouts/Base.astro';
+import Didascalia from '../components/Didascalia.astro';
+import { Image } from 'astro:assets';
+import { getEntry, getEntries, getCollection, render } from 'astro:content';
+import sito from '../data/sito.json';
+import ritratto from '../assets/artista/ritratto.jpg';
+import { eta } from '../lib/eta';
+import { opereOrdinate, alt } from '../lib/opere';
+import { T, percorso, testiSito, testoHtml, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = T[lang];
+const testi = testiSito(lang);
+const opere = await opereOrdinate();
+const apertura = (await getEntry('opere', sito.operaInApertura)) ?? opere[0];
+const sale = (await getCollection('allestimenti')).sort((a, b) => a.data.ordine - b.data.ordine);
+const primaSala = sale[0];
+const a = sito.artista;
+
+const tuttiCapitoli = await Promise.all(
+  (await getCollection('capitoli'))
+    .sort((x, y) => x.data.ordine - y.data.ordine)
+    .map(async (c) => ({
+      id: c.id,
+      progetto: c.data.progetto,
+      parete: c.data.parete,
+      titolo: (lang === 'en' && c.data.en.titolo) || c.data.titolo,
+      testoEn: lang === 'en' && c.data.en.testo ? testoHtml(c.data.en.testo) : null,
+      opere: (await getEntries(c.data.opere)).filter((o) => o && o.data.pubblicata),
+      Content: (await render(c)).Content,
+    })),
+);
+---
+<Base lang={lang} attiva="home" alternativa={percorso(lang === 'it' ? 'en' : 'it', 'home')}>
+  <h1 class="visivamente-nascosto">{t.menu.home}</h1>
+
+  <section class="sala sezione presentazione" data-parete="bianco" aria-labelledby="titolo-artista">
+    <h2 id="titolo-artista" class="sezione-titolo">{t.lartista}</h2>
+    <p class="lead">{testi.presentazione}</p>
+    <figure class="ritratto">
+      <a href={percorso(lang, 'artista')}>
+        <Image class="oblo" src={ritratto} alt={t.ritrattoAlt} widths={[240, 480]} sizes="15rem" />
+      </a>
+      <figcaption>{`${sito.nome.toUpperCase()}, `}<span data-nascita={a.dataNascita}>{eta(a.dataNascita)}</span>{`${t.anni}, ${t.attivoA} ${testi.luogo}`}</figcaption>
+    </figure>
+  </section>
+
+  <section class="sala sala-apertura" data-parete={sito.pareteApertura} aria-label={apertura.data.titolo}>
+  <figure class="apertura">
+    <a href={percorso(lang, 'opera', apertura.id)}>
+      <Image src={apertura.data.immagine} alt={alt(apertura, lang)} widths={[640, 1000, 1400]} sizes="(min-width: 1000px) 60vw, 100vw" loading="eager" />
+    </a>
+    <Didascalia opera={apertura} lang={lang} tag="figcaption" />
+  </figure>
+  </section>
+
+  {testi.progetti.map((progetto, i) => (
+    <>
+      <section class="sala sezione progetto" data-parete={sito.progetti[i].parete ?? 'bianco'} aria-labelledby={`progetto-${progetto.id}`}>
+        <h2 id={`progetto-${progetto.id}`} class="sezione-titolo">{t.ilProgetto}<br />{progetto.titolo}</h2>
+        {progetto.introduzione && <p class="lead">{progetto.introduzione}</p>}
+      </section>
+
+      {tuttiCapitoli.filter((c) => c.progetto === progetto.id).map(({ id, titolo, testoEn, parete, opere: abbinate, Content }) => (
+        <section class:list={['sala', 'capitolo', { 'senza-opere': !abbinate.length }]} data-parete={parete} aria-labelledby={`cap-${id}`}>
+          <h3 id={`cap-${id}`}>{titolo}</h3>
+          <div class="capitolo-testo">{testoEn ? <Fragment set:html={testoEn} /> : <Content />}</div>
+          {abbinate.length > 0 && (
+            <div class:list={['capitolo-opere', { coppia: abbinate.length > 1 }]}><div class="elenco">
+              {abbinate.map((o) => (
+                <figure>
+                  <a href={percorso(lang, 'opera', o.id)}>
+                    <Image src={o.data.immagine} alt={alt(o, lang)} widths={[480, 900]} sizes="(min-width: 760px) 40vw, 100vw" />
+                  </a>
+                  <Didascalia opera={o} lang={lang} tag="figcaption" />
+                </figure>
+              ))}
+            </div></div>
+          )}
+        </section>
+      ))}
+    </>
+  ))}
+
+  <section class="sala chiusura" data-parete="bianco" aria-label={t.menu.allestimenti}>
+    {primaSala && (
+      <figure class="sala-foto">
+        <Image src={primaSala.data.immagine} alt={(lang === 'en' && primaSala.data.en.alt) || primaSala.data.alt} widths={[800, 1400]} sizes="(min-width: 1000px) 70vw, 100vw" />
+      </figure>
+    )}
+    <p><a class="vai" href={percorso(lang, 'opere')}>{t.guardaOpere(opere.length)}</a></p>
+    <p><a class="vai" href={percorso(lang, 'allestimenti')}>{t.vediAllestimenti}</a></p>
+  </section>
+</Base>
+
+<script>
+  // L'età resta corretta anche senza ripubblicare il sito.
+  document.querySelectorAll<HTMLElement>('[data-nascita]').forEach((el) => {
+    const n = new Date(el.dataset.nascita + 'T00:00:00');
+    const o = new Date();
+    let anni = o.getFullYear() - n.getFullYear();
+    if (o.getMonth() < n.getMonth() || (o.getMonth() === n.getMonth() && o.getDate() < n.getDate())) anni--;
+    el.textContent = String(anni);
+  });
+</script>

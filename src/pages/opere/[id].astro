@@ -1,0 +1,13 @@
+---
+import Scheda from '../../views/Scheda.astro';
+import { opereOrdinate } from '../../lib/opere';
+
+export async function getStaticPaths() {
+  const opere = await opereOrdinate();
+  return opere.map((opera, i) => ({
+    params: { id: opera.id },
+    props: { opera, precedente: opere[(i - 1 + opere.length) % opere.length], successiva: opere[(i + 1) % opere.length], tutte: opere },
+  }));
+}
+---
+<Scheda lang="it" {...Astro.props} />

@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import { T, percorso, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = T[lang];
+const sale = (await getCollection('allestimenti')).sort((a, b) => a.data.ordine - b.data.ordine);
+---
+<Base lang={lang} titolo={t.allestimentiTitolo} attiva="allestimenti" alternativa={percorso(lang === 'it' ? 'en' : 'it', 'allestimenti')}>
+  <header class="intestazione"><h1>{t.allestimentiTitolo}</h1></header>
+  <div class="allestimenti">
+    {sale.map((s) => (
+      <figure style="margin:0">
+        <Image src={s.data.immagine} alt={(lang === 'en' && s.data.en.alt) || s.data.alt} widths={[800, 1400]} sizes="(min-width: 1000px) 75vw, 100vw" />
+      </figure>
+    ))}
+  </div>
+</Base>

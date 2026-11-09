@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import sito from '../data/sito.json';
+import ritratto from '../assets/artista/ritratto.jpg';
+import studio1 from '../assets/artista/studio-1.jpg';
+import studio2 from '../assets/artista/studio-2.jpg';
+import studio3 from '../assets/artista/studio-3.jpg';
+import { eta } from '../lib/eta';
+import { T, percorso, testiSito, testoHtml, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = T[lang];
+const testi = testiSito(lang);
+const pagina = await getEntry('pagine', 'artista');
+const { Content } = pagina ? await render(pagina) : { Content: null };
+const testoEn = lang === 'en' && pagina?.data.en.testo ? testoHtml(pagina.data.en.testo) : null;
+const sottotitolo = (lang === 'en' && pagina?.data.en.sottotitolo) || pagina?.data.sottotitolo;
+const a = sito.artista;
+const studio = {
+  it: ['Siro al lavoro con la spugna su una tela verde acqua, con il polittico LUCE appoggiato alla finestra.', 'Siro al lavoro nello studio, mentre dipinge con lo stencil su un tavolo coperto di colori.', 'Siro visto dall’alto mentre dipinge, circondato dalle sue tele.'],
+  en: ['Siro at work with a sponge on a teal canvas, with the LUCE polyptych leaning against the window.', 'Siro at work in the studio, stencilling at a table covered in paint.', 'Siro seen from above while painting, surrounded by his canvases.'],
+}[lang];
+---
+<Base lang={lang} titolo={t.menu.artista} attiva="artista" alternativa={percorso(lang === 'it' ? 'en' : 'it', 'artista')}>
+  <article class="pagina-artista">
+    <header class="artista-testata">
+      <div>
+        <h1 class="sezione-titolo">{sito.nome}</h1>
+        {sottotitolo && <p class="artista-sottotitolo">{sottotitolo}</p>}
+      </div>
+      <figure class="ritratto">
+        <Image class="oblo" src={ritratto} alt={t.ritrattoAlt} widths={[240, 480]} sizes="15rem" loading="eager" />
+        <figcaption>{`${sito.nome.toUpperCase()}, `}<span data-nascita={a.dataNascita}>{eta(a.dataNascita)}</span>{`${t.anni}, ${t.attivoA} ${testi.luogo}`}</figcaption>
+      </figure>
+    </header>
+
+    <div class="biografia">{testoEn ? <Fragment set:html={testoEn} /> : Content && <Content />}</div>
+
+    <section class="studio" aria-labelledby="titolo-studio">
+      <h2 id="titolo-studio">{t.inStudio}</h2>
+      <div class="studio-foto">
+        <Image class="studio-grande" src={studio3} alt={studio[0]} widths={[800, 1600]} sizes="(min-width: 760px) 80vw, 100vw" />
+        <Image src={studio1} alt={studio[1]} widths={[600, 1100]} sizes="(min-width: 760px) 40vw, 100vw" />
+        <Image src={studio2} alt={studio[2]} widths={[600, 1100]} sizes="(min-width: 760px) 40vw, 100vw" />
+      </div>
+    </section>
+  </article>
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-nascita]').forEach((el) => {
+    const n = new Date(el.dataset.nascita + 'T00:00:00');
+    const o = new Date();
+    let anni = o.getFullYear() - n.getFullYear();
+    if (o.getMonth() < n.getMonth() || (o.getMonth() === n.getMonth() && o.getDate() < n.getDate())) anni--;
+    el.textContent = String(anni);
+  });
+</script>

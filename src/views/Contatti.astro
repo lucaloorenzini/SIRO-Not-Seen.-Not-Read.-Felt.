@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import sito from '../data/sito.json';
+import { Image } from 'astro:assets';
+import iconaInstagram from '../assets/icone/instagram.png';
+import { T, percorso, type Lang } from '../lib/i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = T[lang];
+// La chiave di Web3Forms è pubblica per natura: al posto dell'indirizzo email, inoltra i messaggi alla casella dell'artista.
+const chiave = sito.moduloContatti.accessKey;
+---
+<Base lang={lang} titolo={t.contattiTitolo} attiva="contatti" alternativa={percorso(lang === 'it' ? 'en' : 'it', 'contatti')}>
+  <article class="testo-pagina contatti">
+    {sito.instagram && (
+      <a class="instagram" href={`https://www.instagram.com/${sito.instagram}/`} rel="me noopener">
+        <Image src={iconaInstagram} alt="Instagram" width={72} height={72} />
+        <span>@{sito.instagram}</span>
+      </a>
+    )}
+    <h1>{t.contattiTitolo}</h1>
+    <p class="lead">{t.contattiTesto}</p>
+
+    <form class="modulo" id="modulo" action="https://api.web3forms.com/submit" method="POST" data-attivo={chiave ? 'si' : 'no'}
+      data-invio={t.invio} data-inviato={t.inviato} data-errore={t.errore}>
+      <input type="hidden" name="access_key" value={chiave} />
+      <input type="hidden" name="subject" value={sito.moduloContatti.oggetto} />
+      <input type="hidden" name="from_name" value="Sito di Siro" />
+      <input type="checkbox" name="botcheck" class="visivamente-nascosto" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      <label for="nome">{t.campoNome}</label>
+      <input id="nome" name="nome" type="text" autocomplete="name" required maxlength="120" />
+
+      <label for="email">{t.campoEmail}</label>
+      <input id="email" name="email" type="email" autocomplete="email" required maxlength="160" />
+
+      <label for="messaggio">{t.campoMessaggio}</label>
+      <textarea id="messaggio" name="messaggio" rows="7" required maxlength="5000"></textarea>
+
+      <label class="consenso"><input type="checkbox" name="consenso" value="si" required /> <span>{t.consenso}</span></label>
+
+      <button type="submit" disabled={!chiave}>{t.invia}</button>
+      <p class="esito" role="status" aria-live="polite">{!chiave && t.moduloInAttivazione}</p>
+      <p class="nota-privacy">{t.notaPrivacy}</p>
+    </form>
+  </article>
+</Base>
+
+<script>
+  const modulo = document.getElementById('modulo') as HTMLFormElement | null;
+  if (modulo && modulo.dataset.attivo === 'si') {
+    const esito = modulo.querySelector<HTMLElement>('.esito')!;
+    const bottone = modulo.querySelector<HTMLButtonElement>('button')!;
+    modulo.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!modulo.reportValidity()) return;
+      bottone.disabled = true;
+      esito.textContent = modulo.dataset.invio ?? '';
+      try {
+        const r = await fetch(modulo.action, { method: 'POST', headers: { Accept: 'application/json' }, body: new FormData(modulo) });
+        const j = await r.json();
+        if (!r.ok || !j.success) throw new Error();
+        modulo.reset();
+        esito.textContent = modulo.dataset.inviato ?? '';
+      } catch {
+        esito.textContent = modulo.dataset.errore ?? '';
+      } finally {
+        bottone.disabled = false;
+      }
+    });
+  }
+</script>

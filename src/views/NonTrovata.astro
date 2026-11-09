@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import { T, percorso, type Lang } from '../lib/i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = T[lang];
+---
+<Base lang={lang} titolo={t.paginaNonTrovata} alternativa={percorso(lang === 'it' ? 'en' : 'it', 'home')}>
+  <article class="testo-pagina">
+    <h1>{t.nonTrovata}</h1>
+    <p>{t.nonTrovataTesto} <a href={percorso(lang, 'opere')}>{t.vediTutte}</a> {t.o} <a href={percorso(lang, 'home')}>{t.tornaInizio}</a>.</p>
+  </article>
+</Base>

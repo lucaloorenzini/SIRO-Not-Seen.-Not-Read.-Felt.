@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import { SERIE } from '../content.config';
+import sito from '../data/sito.json';
+import { misure, tecnica, titolo, alt, data, titoloEsteso, type Opera } from '../lib/opere';
+import { T, percorso, testoHtml, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang; opera: Opera; precedente: Opera; successiva: Opera; tutte: Opera[] }
+const { lang, opera, precedente, successiva, tutte } = Astro.props;
+const t = T[lang];
+const { Content } = await render(opera);
+const tec = tecnica(opera, lang);
+const mis = misure(opera, lang);
+const didascaliaEn = lang === 'en' && opera.data.en.didascalia ? testoHtml(opera.data.en.didascalia) : null;
+const descrizione = [titolo(opera, lang), tec, mis, data(opera, lang)].filter(Boolean).join(', ') + `. ${t.operaDi} ${sito.nome}.`;
+---
+<Base lang={lang} titolo={titoloEsteso(opera, tutte, lang)} descrizione={descrizione} immagineSocial={opera.data.immagine} attiva="opere" alternativa={percorso(lang === 'it' ? 'en' : 'it', 'opera', opera.id)}>
+  <article class="scheda">
+    <figure class="tela" style="margin:0">
+      <Image src={opera.data.immagine} alt={alt(opera, lang)} widths={[640, 1000, 1600]} sizes="(min-width: 1000px) 60vw, 100vw" loading="eager" />
+    </figure>
+
+    <div>
+      <h1>{titolo(opera, lang)}</h1>
+      <dl>
+        {tec && <><dt>{t.tecnica}</dt><dd>{tec}</dd></>}
+        {mis && <><dt>{t.misure}</dt><dd>{mis}</dd></>}
+        {data(opera, lang) && <><dt>{t.data}</dt><dd>{data(opera, lang)}</dd></>}
+        <dt>{t.serie}</dt><dd><a href={`${percorso(lang, 'opere')}?serie=${opera.data.serie}`}>{SERIE[opera.data.serie][lang]}</a></dd>
+      </dl>
+      <div class="testo">{lang === 'en' ? (didascaliaEn && <Fragment set:html={didascaliaEn} />) : <Content />}</div>
+    </div>
+  </article>
+
+  {opera.data.dettagli && (
+    <section class="dettagli" aria-label={t.dettagli}>
+      {opera.data.dettagli.map((d, i) => (
+        <Image src={d.immagine} alt={(lang === 'en' && opera.data.en.dettagli?.[i]) || d.alt} widths={[400, 800]} sizes="(min-width: 700px) 30vw, 100vw" />
+      ))}
+    </section>
+  )}
+
+  <nav class="sfoglia" aria-label={t.altreOpere}>
+    <a href={percorso(lang, 'opera', precedente.id)}><span>{t.precedente}</span><strong>{titoloEsteso(precedente, tutte, lang)}</strong></a>
+    <a class="successiva" href={percorso(lang, 'opera', successiva.id)}><span>{t.successiva}</span><strong>{titoloEsteso(successiva, tutte, lang)}</strong></a>
+  </nav>
+  <p style="margin-top:2rem"><a href={percorso(lang, 'opere')}>{t.tutteOpere}</a></p>
+</Base>

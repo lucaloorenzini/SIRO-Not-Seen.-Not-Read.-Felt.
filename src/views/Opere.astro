@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro';
+import Didascalia from '../components/Didascalia.astro';
+import { Image } from 'astro:assets';
+import { SERIE } from '../content.config';
+import { opereOrdinate, alt } from '../lib/opere';
+import { T, percorso, type Lang } from '../lib/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = T[lang];
+const opere = await opereOrdinate();
+const presenti = Object.entries(SERIE).filter(([k]) => opere.some((o) => o.data.serie === k));
+---
+<Base lang={lang} titolo={t.opereTitolo} attiva="opere" alternativa={percorso(lang === 'it' ? 'en' : 'it', 'opere')}>
+  <header class="intestazione">
+    <h1>{t.opereTitolo}</h1>
+    <p>{t.opereSottotitolo(opere.length)}</p>
+  </header>
+
+  <ul class="filtri" id="filtri" hidden aria-label={t.filtra}>
+    <li><button type="button" data-serie="" aria-pressed="true">{t.tutte}</button></li>
+    {presenti.map(([k, nomi]) => (
+      <li><button type="button" data-serie={k} aria-pressed="false">{nomi[lang]}</button></li>
+    ))}
+  </ul>
+
+  <ul class="parete" id="parete">
+    {opere.map((o) => {
+      // Se mancano le misure, la mostriamo come una tela di 100 cm di base
+      const base = o.data.base ?? 100;
+      return (
+        <li data-serie={o.data.serie} style={`--b:${base}`}>
+          <a href={percorso(lang, 'opera', o.id)}>
+            <Image src={o.data.immagine} alt={alt(o, lang)} widths={[300, 600]} sizes={`${Math.round(base * 2.7)}px`} />
+            <Didascalia opera={o} lang={lang} />
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</Base>
+
+<script>
+  // Filtro per serie. Senza JavaScript si vedono comunque tutte le opere.
+  const filtri = document.getElementById('filtri');
+  const voci = document.querySelectorAll<HTMLLIElement>('#parete > li');
+  if (filtri) {
+    filtri.hidden = false;
+    const applica = (serie: string) => {
+      filtri.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.serie ?? '') === serie)));
+      voci.forEach((li) => (li.hidden = !!serie && li.dataset.serie !== serie));
+      const u = new URL(location.href);
+      serie ? u.searchParams.set('serie', serie) : u.searchParams.delete('serie');
+      history.replaceState(null, '', u);
+    };
+    filtri.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button');
+      if (b) applica(b.dataset.serie ?? '');
+    });
+    const iniziale = new URL(location.href).searchParams.get('serie');
+    if (iniziale && filtri.querySelector(`[data-serie="${CSS.escape(iniziale)}"]`)) applica(iniziale);
+  }
+</script>

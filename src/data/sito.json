@@ -1,0 +1,52 @@
+{
+  "nome": "Siro",
+  "titoloSerie": "Not seen, not read, felt",
+  "descrizione": "Siro, pittore. Parole a stencil su tela: non viste, non lette, sentite.",
+  "visione": "La parola cambia giurisdizione. Esce dalla pagina, occupa la tela, e diventa materia.",
+  "operaInApertura": "felt",
+  "instagram": "siroverseart",
+  "indicizzabile": false,
+  "artista": {
+    "nomeCompleto": "",
+    "dataNascita": "1970-08-18",
+    "luogo": "Roma (Italia)",
+    "presentazione": "Sono nato a Roma il 18 agosto 1970 e arrivo all’arte da un territorio apparentemente distante: il diritto. Sono avvocato per formazione e professione e ho trascorso gran parte della mia vita dentro le parole: parole che definiscono, stabiliscono, accusano, difendono, promettono, vincolano. Parole alle quali, nel diritto, viene chiesto di essere precise."
+  },
+  "progetti": [
+    {
+      "id": "not-seen",
+      "titolo": "Not Seen, Not Read, Felt.",
+      "introduzione": "Non è soltanto il titolo di un’opera. È una dichiarazione di poetica.",
+      "parete": "bianco"
+    },
+    {
+      "id": "dont-judge",
+      "titolo": "Don’t Judge, Never Judge.",
+      "introduzione": "",
+      "parete": "fucsia"
+    }
+  ],
+  "en": {
+    "descrizione": "Siro, painter. Stencilled words on canvas: not seen, not read, felt.",
+    "visione": "The word changes jurisdiction. It leaves the page, occupies the canvas, and becomes matter.",
+    "artista": {
+      "presentazione": "I was born in Rome on 18 August 1970 and I come to art from a seemingly distant territory: the law. I am a lawyer by training and profession, and I have spent much of my life inside words: words that define, establish, accuse, defend, promise, bind. Words that, in the law, are required to be precise.",
+      "luogo": "Rome (Italy)"
+    },
+    "progetti": {
+      "not-seen": {
+        "titolo": "Not Seen, Not Read, Felt.",
+        "introduzione": "It is not just the title of a work. It is a declaration of poetics."
+      },
+      "dont-judge": {
+        "titolo": "Don’t Judge, Never Judge.",
+        "introduzione": ""
+      }
+    }
+  },
+  "moduloContatti": {
+    "accessKey": "",
+    "oggetto": "Nuovo messaggio dal sito di Siro"
+  },
+  "pareteApertura": "blu"
+}
